@@ -1,118 +1,64 @@
+
 # Prompts — TP 1
 
-El registro del proceso, en orden. Tres prompts en una sola conversación de Gemini Canvas. El artefacto quedó terminado en el tercero.
+El registro del proceso de construccion. Todo el desarrollo se hizo en una sola conversacion, enfocando el esfuerzo en la arquitectura (SVG) y las reglas defensivas de estado
 
 ---
 
-## 1 — Prompt inicial
+## 1 — Prompt inicial: Estructura, Escenario y Arquitectura
 
-```
-Construí un captcha de verificación que funciona con una máquina de Galton.
+```text
+Construi un captcha de verificacion basado en una maquina de Galton. 
 
 Estructura:
-- <header> con el título "Verificación de seguridad" y el captcha objetivo:
-  3 letras que el usuario tiene que ingresar, generadas al azar al cargar.
-- <main> con el tablero: un triángulo de pegs de 4 filas (1, 2, 3 y 4 pegs por fila) y, debajo, una fila de 5 canaletas. Cada canaleta muestra
-  una letra (A a E, de izquierda a derecha).
-- <footer> con lo ingresado hasta ahora, un <button> "Soltar bola" y un
-  <button> "Borrar último".
+Envolve el captcha en una pagina de "Recuperación de cuenta de Steam". 
+- <header> con el título "Steam - Recuperación de cuenta".
+- <main> dividido en dos pasos controlados por un estado `paso` ("formulario" y "captcha").
+- Paso "formulario": Pide nombre de cuenta y mail, con un boton "Buscar cuenta". Al hacer click, pasa al paso "captcha".
+- Paso "captcha": Muestra un texto con un objetivo de 3 letras al azar. Abajo, el tablero de Galton: un triángulo de pegs de 4 filas (1, 2, 3 y 4 pegs) y, debajo, una fila de 5 canaletas fijas (letras A a E). Debajo de cada letra, escribí su probabilidad en porcentaje (6.25%, 25%, 37.5%, 25%, 6.25%).
+- <footer> (solo visible en el captcha): Muestra las letras ingresadas hasta el momento y un <button> "Soltar bola". 
 
 Estilo:
-- Estética de captcha viejo: fondo gris claro, bordes duros, tipografía
-  monoespaciada, cero redondeo.
-- Pegs como círculos chicos grises. La bola, un círculo naranja.
-- Las canaletas del centro y las de los bordes se ven iguales: la
-  probabilidad está escrita, no señalizada con color.
+- Estetica clon de Steam: fondo dark mode (#1b2838), texto gris claro (#c7d5e0), botones color azul Steam (#66c0f4) sin bordes, tipografía sans-serif limpia. 
+- Los pegs son círculos pequeños grises. La bola es un círculo de color verde brillante (como el de los descuentos de Steam).
 
 Comportamiento:
-- Estado: objetivo (3 letras), ingresados (array de letras, máximo 3),
-  cayendo (booleano que bloquea la interacción durante la animación).
-- Al click en "Soltar bola": si cayendo es false y ingresados tiene menos
-  de 3 letras, arranca la caída. La bola aparece arriba del primer peg y
-  baja fila por fila. En cada fila decide al azar 50/50 izquierda o
-  derecha, y se desplaza media columna hacia ese lado mientras baja una
-  fila. Cada paso dura 220ms. Después de la sexta fila cae en la canaleta
-  correspondiente y su letra se agrega a ingresados.
-- Al click en "Borrar último": saca la última letra de ingresados. No hace
-  falta soltar ninguna bola para borrar.
-- Cuando ingresados llega a 3 letras, comparar con objetivo y mostrar en el
-  footer si la verificación pasó o falló, con un botón para reiniciar que
-  genera un objetivo nuevo y vacía ingresados.
+- Estado: objetivo (3 letras), ingresados (array de letras, máximo 3), cayendo (booleano).
+- Click en "Soltar bola": si cayendo es false, arranca la caída. La bola aparece en el peg superior y baja fila por fila. En cada fila decide 50/50 izquierda o derecha. Cada paso dura 200ms. Cae en la canaleta correspondiente y suma la letra a "ingresados". Mientras cae, los clicks se bloquean.
+- Si ingresados llega a 3 letras: compara con el objetivo. Si falla, el tablero se limpia, el objetivo cambia y arranca de cero (sin botón de borrar). Si acierta, muestra un mensaje de "Enlace de recuperación enviado".
 
 Constraints:
-- Un solo archivo HTML, con el CSS en un <style> y el JS en un <script>.
-- Vanilla JS, sin frameworks ni dependencias externas.
-- Los pegs, la bola y las canaletas son elementos del DOM posicionados con
-  CSS. No usar <canvas>: quiero poder ver el estado reflejado en el DOM.
+- Un solo archivo HTML con CSS y JS integrados. Vanilla JS, sin dependencias.
+- Prohibido usar <canvas>. Necesito que las coordenadas de la bola y el estado general sean 100% auditables en tiempo real desde el inspector del DOM.
+- Considerá que el tablero es un sistema geométrico. Utilizá la tecnología nativa web que te permita dibujar y animar estas formas con la mayor precisión matemática y limpieza de codigo posible, evitando enmascarar la lógica detrás de un HTML lleno de etiquetas redundantes.
+
 ```
 
-**Qué intentaba lograr:** el artefacto entero de una sola vez, nombrando las cinco capas — estructura con etiquetas semánticas, estilo, comportamiento expresado como estado, y constraints de empaque.
+**Qué intentaba lograr:** Establecer el esqueleto completo en una sola pasada. Al forzar la restricción de "precisión matemática y limpieza" junto con la prohibición de `<canvas>`, estaba empujando a la IA a que tomara la decisión arquitectónica de usar SVG por su cuenta, sin pedírselo explícitamente.
 
-**Qué devolvió:** el tablero funcionando, con las 4 filas de pegs, las 5 canaletas y la animación de caída. Respetó los tres constraints: un solo archivo, sin dependencias, y pegs y bola como elementos del DOM en lugar de `<canvas>`.
-
-**Qué hice con eso:** lo acepté. Pero el prompt tenía dos ambigüedades que no vi al escribirlo y que el modelo resolvió por su cuenta — están detalladas en el README, porque son lo más interesante de esta entrega.
+**Qué devolvió:** El codigo funcionó al primera. El modelo implementó todo el tablero dentro de una etiqueta `<svg>`, separando impecablemente la lógica de estado en JS de la representación geométrica de los vectores.
 
 ---
 
-## 2 — Iterar sobre el estado: reordenar las canaletas
+## 2 — Iterar sobre el estado: La agencia del usuario
+
+```text
+Agregale al captcha un control para cambiar el punto de inicio de la bola, dandole agencia al usuario antes de soltarla.
+
+Estructura y Comportamiento:
+- Añadi un estado `posicionInicio` que arranque en el centro (valor 0).
+- Arriba del tablero SVG, agregá un `<input type="range">` que tenga 3 posiciones discretas (por ejemplo: -1 izquierda, 0 centro, 1 derecha).
+- Al mover el slider, la posicion visual de la bola en reposo (su coordenada `cx` en el SVG) debe desplazarse instantáneamente para alinearse con ese nuevo punto de partida.
+- Al hacer clic en "Soltar bola", la lógica de caida y el cálculo de colisiones deben arrancar desde esa `posicionInicio`, respetando la distribucion hacia abajo.
+
+Regla defensiva:
+- Mientras el estado `cayendo` sea true, el slider DEBE estar deshabilitado (`disabled`). Esto es para evitar que el usuario cambie el punto de origen con la bola en el aire, lo que desfasaría el cálculo lógico de la posición visual en el SVG.
 
 ```
-Agregale al captcha dos estados: `letras` (el array de 5 letras de las
-canaletas, hoy fijas en el HTML) y `seleccionada` (el índice de la canaleta
-tocada primero, o null).
 
-Click en una canaleta con `seleccionada` en null: pasa a ser ese índice y la
-canaleta se marca.
-Click en otra canaleta: se intercambian las dos letras dentro de `letras`,
-`seleccionada` vuelve a null y se sacan las marcas.
-Click en la canaleta ya seleccionada: `seleccionada` vuelve a null sin
-intercambiar nada.
+**Qué intentaba lograr:** Darle al usuario la falsa sensación de que puede engañar a la máquina apuntando a los bordes.
 
-Dos reglas: mientras `cayendo` es true los clicks en canaletas no hacen
-nada, y los porcentajes pertenecen a la posición, no a la letra — al
-intercambiar, los números no se mueven.
-```
+**Por qué está escrito así:** Si le pedía "agregá un control para mover la bola" de forma genérica, el modelo podía inventar cualquier cosa. Al hablarle directamente del atributo `cx` del SVG y del estado `posicionInicio`, me asegure de que integrara el control a la arquitectura matematica que ya estaba funcionando. La regla defensiva final fue vital para que no se rompiera la sincronización del estado durante la animación.
 
-**Qué intentaba lograr:** devolverle agencia al usuario. Sin esto el captcha es una tragamonedas: mirás caer la bola y no podés hacer nada. Con esto podés poner en el centro la letra que necesitás, que es donde la probabilidad es más alta.
+**Qué devolvió:** El slider integrado correctamente, actualizando la posición de la bola en reposo y bloqueándose correctamente al iniciar la caida.
 
-**Por qué está escrito así:** las tres líneas de click son la ida y **dos** vueltas distintas — completar el intercambio, y cancelar la selección. Nombrar solo la ida deja al modelo inventando cómo se sale del estado, y lo más común es que no haya forma de cancelar.
-
-Las dos reglas del final previenen bugs concretos. Sin la primera, reordenar con la bola en el aire la hace aterrizar sobre una letra distinta de la que había cuando soltaste. Sin la segunda, el modelo mueve el porcentaje junto con la letra, porque están renderizados en el mismo elemento — es la confusión clásica entre el estado y su reflejo en el DOM.
-
-**Qué devolvió:** las tres transiciones correctas y las dos reglas respetadas. Los porcentajes se quedaron en su posición al intercambiar.
-
----
-
-## 3 — Envolver el captcha en una página anfitriona
-
-```
-Envolvé el captcha en una página que sea sobre otra cosa.
-
-La página es un formulario para reservar un turno: <header> con el nombre
-del lugar, <main> con un <form> de nombre, email y fecha y un <button>
-"Reservar turno", <footer> con una línea de contacto.
-
-Agregá un estado `paso` con tres valores: "formulario", "captcha" y
-"confirmado".
-- Arranca en "formulario": se ve el form, el captcha no.
-- Al enviar el form: `paso` pasa a "captcha", el form se oculta y aparece
-  el tablero de Galton.
-- Si la verificación pasa: `paso` pasa a "confirmado" y se ve el turno
-  reservado con los datos que cargó.
-- Si falla: se queda en "captcha" con un objetivo nuevo.
-
-El captcha no cambia por dentro: mismo tablero, mismos estados, misma
-lógica. Solo deja de ser la página y pasa a ser un paso.
-```
-
-**Qué intentaba lograr:** que el captcha apareciera donde aparece un captcha de verdad — cortando una tarea que el usuario quiere terminar. Una página que es solo el captcha no frustra a nadie, porque nadie llegó ahí queriendo otra cosa.
-
-**Por qué la última línea:** un pedido estructural como este es el caso donde el modelo tiende a reescribir lo que ya funcionaba, y ahí se pierde el trabajo de los dos prompts anteriores. Decirlo explícito lo evitó.
-
-**Qué devolvió:** los tres pasos funcionando, con el captcha intacto adentro del segundo. El formulario quedó como un centro médico pidiendo turno.
-
----
-
-## Conversación completa
-
-Una sola conversación de Gemini Canvas, sin reiniciar el hilo. El artefacto final tiene 828 líneas en un archivo.

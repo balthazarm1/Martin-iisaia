@@ -1,37 +1,27 @@
 # TP 1 — Captcha de máquina de Galton
 
-Un formulario de reserva de turno donde la verificación te hace ingresar tres letras soltando bolas en una máquina de Galton. Funciona bien y usarlo es horrible, que era la idea.
+**Autor:** Ing. Balthazar Martín
 
-## Cómo se ejecuta
+Un formulario de recuperación de cuenta de Steam donde, justo antes de enviarte el mail, te interrumpe una "Verificación biométrica" basada en una máquina de Galton. Funciona bien y es intencionalmente frustrante.
 
-Doble click en `index.html`. Un solo archivo, sin dependencias.
+## Como se ejecuta
 
-## Qué me propuse construir
+Doble click en `index.html`, es un solo archivo sin dependencias externas.
 
-Una bad UI hostil por matemática y no por capricho. No esconde nada —las probabilidades están escritas debajo de cada canaleta— y aun así duele, porque la binomial junta las bolas en el centro y las letras de los bordes salen una vez cada dieciséis. Salió en tres prompts, en una sola conversación de Gemini Canvas.
+## Que me propuse construir
 
-## Decisiones que tomé yo
+Una *bad UI* que interrumpa una tarea de urgencia (recuperar una cuenta de juegos) y que frustre por diseño matemático. Para hacerlo más "cruel" le di al usuario una falsa sensacion de control pero dejé que la distribución binomial haga el trabajo de amontonar las probabilidades en el centro.
 
-**DOM en vez de `<canvas>`.** La más importante. Pedido a secas, un tablero de Galton sale dibujado en canvas: anda igual, pero el estado deja de verse en el DOM. Acá los pegs, la bola y las canaletas son divs, y se puede abrir el inspector a mirar el estado y su reflejo al mismo tiempo.
+## Decisiones arquitectonicas
 
-**Cuatro filas, cinco canaletas.** Dan 16 caminos y una distribución de 1/16, 4/16, 6/16, 4/16, 1/16. Con seis filas el borde cae a 1/64: más cruel, pero demasiado lento para mostrarlo en clase.
+**SVG como sistema de coordenadas.** La restricción era no usar `<canvas>` para que el estado no quedara oculto. En lugar de ensuciar el DOM posicionando muchos `<div>` con CSS absoluto, force al modelo a utilizar un sistema geométrico vectorial (SVG). De esta forma, el codigo es mas limpio y se puede abrir el inspector para ver commo los atributos `cx` y `cy` de la bola cambian en tiempo real.
 
-**Borrar con un botón.** La versión más hostil era obligarte a embocar una canaleta de borrado. Convierte un error en una espiral de la que no se sale.
+**Agencia ilusoria (Slider).** A diferencia de un Galton estático, le agregué un `<input type="range">` que permite elegir desde dónde soltar la bola (izquierda, centro, derecha). Le da al usuario la ilusión de que puede apuntar a los bordes (donde la probabilidad es de apenas 6.25%), pero la máquina igual tiende a centrar la bola 
 
-**Las letras de las canaletas se reordenan.** Sin esto mirás caer la bola sin poder intervenir. Poder mover al centro la que necesitás alcanza para que sea una interfaz y no una tragamonedas, y tampoco la vuelve fácil: el objetivo son tres letras y el centro es uno.
+**El error no perdona.** Si fallás las 3 letras objetivo, no hay botón para "Borrar último". El sistema asume que falló la biometría, borra tu progreso y cambia el objetivo. Te castiga reiniciando el ciclo.
 
-**El captcha no es la página.** Suelto no molesta a nadie, porque nadie llegó ahí queriendo otra cosa. Envuelto en una reserva de turno corta algo que querías terminar.
+## Qué salio bien en el proceso
 
-## Qué salió mal y cómo lo corregí
+La especificación de requerimientos. En lugar de pedir "dibujá un tablero", le exigí al modelo "precisión matemática y limpieza de código" para evitar que usara `divs`. El modelo dedujo correctamente que la mejor arquitectura para eso era SVG.
 
-El resultado salió bien y el prompt igual estaba mal.
-
-Tenía una contradicción —la estructura pedía cuatro filas de pegs y el comportamiento hablaba de "la sexta", que había quedado de una versión anterior— y una referencia huérfana: el estilo decía que la probabilidad va escrita, pero la estructura nunca pidió mostrarla. El modelo se quedó con cuatro filas y agregó las probabilidades, bien calculadas.
-
-Las dos ambigüedades salieron a mi favor, y ahí está el problema: juzgando por el resultado, me quedo con que el prompt estaba bien escrito. Faltó releerlo cruzando las secciones entre sí antes de mandarlo, que es la revisión que uno saltea cuando escribió el texto hace treinta segundos.
-
-Lo que sí anduvo por diseño fueron las tres reglas defensivas de los prompts 2 y 3: bloquear los clicks mientras la bola cae, dejar los porcentajes pegados a la posición y no a la letra, y pedir que el captcha no se tocara al envolverlo. Las tres son bugs silenciosos si no se nombran.
-
-## Prompts
-
-El registro completo está en [prompts.md](prompts.md). Los que más pesaron son el primero, que fija el artefacto entero, y el del reordenamiento, que convirtió una animación que se mira en una interfaz que se opera.
+Las reglas defensivas funcionaron bien: al especificar en el prompt que el slider de posición debía deshabilitarse mientras el estado `cayendo` fuera *true*, evité un bug crítico donde el usuario podría desfasar el cálculo lógico de las coordenadas visuales en pleno vuelo.
