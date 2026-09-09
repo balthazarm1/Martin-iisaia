@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steam - Recuperación de cuenta</title>
+    <title>Steam Guard - Verificación</title>
     <style>
         /* Estética clon de Steam */
         body {
@@ -13,408 +13,232 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh;
             margin: 0;
         }
-        .container {
+        .steam-container {
             background-color: #171a21;
             padding: 30px;
-            width: 450px;
             border-radius: 4px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            width: 320px;
+            text-align: center;
+            border: 1px solid #2a475e;
         }
         h2 {
-            color: #ffffff;
             margin-top: 0;
+            color: #ffffff;
+            font-size: 1.3em;
             text-transform: uppercase;
-            font-size: 1.2em;
             letter-spacing: 2px;
             border-bottom: 1px solid #2a475e;
             padding-bottom: 10px;
         }
-        
-        /* Paso 1: Formulario */
-        #paso-formulario { display: block; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 0.9em; }
-        input[type="text"], input[type="email"] {
-            width: 95%;
-            padding: 10px;
-            background-color: #323e4c;
-            border: none;
-            color: #ffffff;
-            border-radius: 2px;
-            outline: none;
+        .instruction {
+            color: #8f98a0;
+            font-size: 0.9em;
+            margin-bottom: 20px;
         }
-        input:focus { background-color: #3c4958; }
-        
-        button {
-            background: linear-gradient(to right, #47bfff 5%, #1a44c2 60%);
-            background-position: 25%;
-            background-size: 330% 100%;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 2px;
+        .target-pin {
             font-weight: bold;
-            width: 100%;
-            margin-top: 10px;
+            color: #66c0f4;
+            font-size: 1.4em;
+            letter-spacing: 4px;
+            display: block;
+            margin-top: 5px;
+        }
+        /* Pantalla del PIN */
+        .display {
+            background-color: #323e4c;
+            border: 1px solid #1b2838;
+            border-radius: 3px;
+            height: 50px;
+            font-size: 2em;
+            letter-spacing: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        /* Teclado */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        button {
+            background-color: #2a475e;
+            border: none;
+            border-radius: 2px;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #c7d5e0;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.1s;
+        }
+        button:hover {
+            background-color: #3c4958;
+            color: #ffffff;
+        }
+        button:active {
+            background-color: #1b2838;
+        }
+        
+        /* Botones especiales */
+        .btn-delete {
+            background-color: #4a2a2a;
+            color: #ff5c5c;
+        }
+        .btn-delete:hover {
+            background-color: #5a3a3a;
+        }
+        .btn-submit {
+            background: linear-gradient(to right, #47bfff 5%, #1a44c2 60%);
+            background-size: 330% 100%;
+            background-position: 25%;
+            color: white;
             transition: background-position 0.3s;
         }
-        button:hover { background-position: 0%; }
-        button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.6; }
-
-        /* Paso 2: Captcha SVG */
-        #paso-captcha { display: none; }
-        .objetivo-box {
-            background-color: #2a475e;
-            padding: 10px;
-            text-align: center;
-            font-size: 1.2em;
-            letter-spacing: 5px;
-            border-radius: 2px;
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: #ffffff;
+        .btn-submit:hover {
+            background-position: 0%;
+            color: white;
         }
 
-        /* Control Slider (Agencia del usuario) */
-        .controles-slider {
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        .controles-slider label {
-            color: #8f98a0;
+        .msg {
+            margin-top: 15px;
             font-weight: bold;
+            height: 20px;
             font-size: 0.9em;
         }
-        input[type="range"] {
-            width: 80%;
-            margin: 10px 0;
-            accent-color: #66c0f4;
-            cursor: pointer;
-        }
-        input[type="range"]:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            width: 80%;
-            margin: 0 auto;
-            font-size: 0.8em;
-            color: #8f98a0;
-        }
-        
-        /* Contenedor SVG */
-        .svg-container {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-        svg {
-            background-color: #12151a;
-            border: 1px solid #2a475e;
-            border-radius: 4px;
-        }
-        
-        /* Elementos SVG */
-        .svg-peg { fill: #67707b; }
-        .svg-bola {
-            fill: #a4d007;
-            transition: cx 0.2s linear, cy 0.2s linear;
-        }
-        .svg-texto-letra {
-            fill: #ffffff;
-            font-size: 16px;
-            font-weight: bold;
-            text-anchor: middle;
-            user-select: none;
-        }
-        .svg-texto-prob {
-            fill: #8f98a0;
-            font-size: 10px;
-            text-anchor: middle;
-            user-select: none;
-        }
-        .svg-separador {
-            stroke: #2a475e;
-            stroke-width: 2;
-        }
-
-        /* Footer Captcha */
-        .ingresados-box {
-            text-align: center;
-            letter-spacing: 5px;
-            font-size: 1.2em;
-            margin: 15px 0;
-            min-height: 25px;
-            color: #a4d007;
-            font-weight: bold;
-        }
-        #mensaje { text-align: center; font-weight: bold; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- PASO 1 -->
-    <div id="paso-formulario">
-        <h2>Steam - Recuperación de cuenta</h2>
-        <div class="form-group">
-            <label>Nombre de la cuenta de Steam</label>
-            <input type="text" id="steam-user" placeholder="Ej: gabe_newell">
-        </div>
-        <div class="form-group">
-            <label>Dirección de email</label>
-            <input type="email" id="steam-email" placeholder="Ej: gabe@valvesoftware.com">
-        </div>
-        <button id="btn-buscar">Buscar cuenta</button>
+<div class="steam-container">
+    <h2>Steam Guard</h2>
+    <p class="instruction">Introduce el código del Autenticador Móvil:<br><span class="target-pin" id="target-pin">---</span></p>
+    
+    <div class="display" id="display"></div>
+    
+    <div class="keypad">
+        <button class="key-heavy" data-val="1">1</button>
+        <button class="key-chatter" data-val="2">2</button>
+        <button class="key-normal" data-val="3">3</button>
+        <button class="key-heavy" data-val="4">4</button>
+        <button class="key-chatter" data-val="5">5</button>
+        <button class="key-normal" data-val="6">6</button>
+        <button class="key-heavy" data-val="7">7</button>
+        <button class="key-chatter" data-val="8">8</button>
+        <button class="key-normal" data-val="9">9</button>
+        <button class="btn-delete" id="btn-delete">DEL</button>
+        <button class="key-normal" data-val="0">0</button>
+        <button class="btn-submit" id="btn-submit">OK</button>
     </div>
-
-    <!-- PASO 2 -->
-    <div id="paso-captcha">
-        <h2>Verificación biométrica</h2>
-        <div class="objetivo-box">OBJETIVO: <span id="objetivo-txt">---</span></div>
-        
-        <!-- Slider de Posición -->
-        <div class="controles-slider">
-            <label for="inicio-slider">Punto de caída:</label>
-            <input type="range" id="inicio-slider" min="-1" max="1" value="0" step="1">
-            <div class="slider-labels">
-                <span>Izq</span>
-                <span>Centro</span>
-                <span>Der</span>
-            </div>
-        </div>
-
-        <div class="svg-container">
-            <svg id="galton-svg" width="320" height="300" viewBox="0 0 320 300" xmlns="http://www.w3.org/2000/svg"></svg>
-        </div>
-        
-        <div class="ingresados-box">INGRESO: <span id="ingresados-txt"></span></div>
-        <button id="btn-soltar">Soltar bola</button>
-        <div id="mensaje"></div>
-    </div>
+    
+    <div class="msg" id="msg"></div>
 </div>
 
 <script>
     const estado = {
-        objetivo: [],
-        ingresados: [],
-        cayendo: false,
-        posicionInicio: 0, // Nuevo estado del slider
-        letras: ['A', 'B', 'C', 'D', 'E'],
-        probs: ['6.25%', '25%', '37.5%', '25%', '6.25%']
-    };
-
-    const config = {
-        filas: 4,
-        tiempoPaso: 200, 
-        svgWidth: 320,
-        svgHeight: 300,
-        startY: 40,
-        distY: 45, 
-        separacionX: 45, 
-        bolaRadio: 6,
-        pegRadio: 4
+        objetivo: "",
+        ingresado: "",
+        tiempoInicioPress: 0
     };
 
     const dom = {
-        pasoForm: document.getElementById('paso-formulario'),
-        pasoCaptcha: document.getElementById('paso-captcha'),
-        btnBuscar: document.getElementById('btn-buscar'),
-        btnSoltar: document.getElementById('btn-soltar'),
-        slider: document.getElementById('inicio-slider'),
-        svg: document.getElementById('galton-svg'),
-        objTxt: document.getElementById('objetivo-txt'),
-        ingTxt: document.getElementById('ingresados-txt'),
-        mensaje: document.getElementById('mensaje')
+        targetPin: document.getElementById('target-pin'),
+        display: document.getElementById('display'),
+        msg: document.getElementById('msg'),
+        btnDelete: document.getElementById('btn-delete'),
+        btnSubmit: document.getElementById('btn-submit')
     };
 
-    let bolaSvg = null;
-
     function init() {
-        dibujarTableroSVG();
-        dom.btnBuscar.addEventListener('click', iniciarCaptcha);
-        dom.btnSoltar.addEventListener('click', soltarBola);
-        
-        // Listener del slider para mover la bola en reposo
-        dom.slider.addEventListener('input', (e) => {
-            estado.posicionInicio = parseInt(e.target.value);
-            actualizarPosicionBola();
-        });
-    }
-
-    function iniciarCaptcha() {
-        dom.pasoForm.style.display = 'none';
-        dom.pasoCaptcha.style.display = 'block';
         generarObjetivo();
-    }
-
-    function dibujarTableroSVG() {
-        dom.svg.innerHTML = ''; 
-        const centroX = config.svgWidth / 2;
-
-        for (let f = 0; f < config.filas; f++) {
-            const numPegs = f + 1;
-            const y = config.startY + (f * config.distY);
-            for (let p = 0; p < numPegs; p++) {
-                const offset = (p - (f / 2)) * config.separacionX;
-                const peg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                peg.setAttribute("cx", centroX + offset);
-                peg.setAttribute("cy", y);
-                peg.setAttribute("r", config.pegRadio);
-                peg.setAttribute("class", "svg-peg");
-                dom.svg.appendChild(peg);
-            }
-        }
-
-        const yCanaletasInicio = config.startY + (config.filas * config.distY);
-        for (let i = 0; i < estado.letras.length; i++) {
-            const offsetDestino = (i - (config.filas / 2)) * config.separacionX;
-            const centroCanaletaX = centroX + offsetDestino;
-
-            if (i > 0) {
-                const linea = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                const xSeparador = centroCanaletaX - (config.separacionX / 2);
-                linea.setAttribute("x1", xSeparador);
-                linea.setAttribute("y1", yCanaletasInicio);
-                linea.setAttribute("x2", xSeparador);
-                linea.setAttribute("y2", config.svgHeight);
-                linea.setAttribute("class", "svg-separador");
-                dom.svg.appendChild(linea);
-            }
-
-            const txtLetra = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            txtLetra.setAttribute("x", centroCanaletaX);
-            txtLetra.setAttribute("y", yCanaletasInicio + 30);
-            txtLetra.setAttribute("class", "svg-texto-letra");
-            txtLetra.textContent = estado.letras[i];
-            dom.svg.appendChild(txtLetra);
-
-            const txtProb = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            txtProb.setAttribute("x", centroCanaletaX);
-            txtProb.setAttribute("y", yCanaletasInicio + 50);
-            txtProb.setAttribute("class", "svg-texto-prob");
-            txtProb.textContent = estado.probs[i];
-            dom.svg.appendChild(txtProb);
-        }
-
-        bolaSvg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        bolaSvg.setAttribute("r", config.bolaRadio);
-        bolaSvg.setAttribute("class", "svg-bola");
-        bolaSvg.style.display = "none";
-        dom.svg.appendChild(bolaSvg);
-    }
-
-    function actualizarPosicionBola() {
-        if (!bolaSvg || estado.cayendo) return;
-        const centroX = config.svgWidth / 2;
-        // Desplaza la posición inicial basándose en el valor del slider (-1, 0, 1)
-        const xInicial = centroX + (estado.posicionInicio * config.separacionX);
-        bolaSvg.style.transition = 'none';
-        bolaSvg.setAttribute("cx", xInicial);
-        bolaSvg.setAttribute("cy", config.startY - 20);
-        bolaSvg.style.display = "block";
+        configurarTecladoDefectuoso();
     }
 
     function generarObjetivo() {
-        estado.objetivo = Array.from({length: 3}, () => estado.letras[Math.floor(Math.random() * 5)]);
-        dom.objTxt.textContent = estado.objetivo.join(' ');
-        estado.ingresados = [];
-        
-        // Resetear slider y UI
-        estado.posicionInicio = 0;
-        dom.slider.value = 0;
-        dom.slider.disabled = false;
-        dom.btnSoltar.disabled = false;
-        dom.mensaje.style.display = 'none';
-        
-        actualizarIngresados();
-        actualizarPosicionBola();
+        // Forzamos un objetivo difícil (1 pesado, 5, 2, 8 con rebote)
+        estado.objetivo = "1528"; 
+        dom.targetPin.textContent = estado.objetivo;
+        estado.ingresado = "";
+        actualizarPantalla();
     }
 
-    function actualizarIngresados() {
-        dom.ingTxt.textContent = estado.ingresados.join(' ') || '- - -';
+    function actualizarPantalla() {
+        dom.display.textContent = "•".repeat(estado.ingresado.length);
     }
 
-    function soltarBola() {
-        if (estado.cayendo || estado.ingresados.length >= 3) return;
-        
-        estado.cayendo = true;
-        dom.btnSoltar.disabled = true;
-        dom.slider.disabled = true; // REGLA DEFENSIVA: Bloquear slider en el aire
-        dom.mensaje.style.display = 'none'; 
-        
-        let posVirtual = estado.posicionInicio; // La caída hereda el sesgo del slider
-        let filaActual = 0;
-        const centroX = config.svgWidth / 2;
-        
-        actualizarPosicionBola(); // Asegurar punto de inicio visual
-        bolaSvg.getBoundingClientRect(); // Forzar reflow
-        
-        bolaSvg.style.transition = `cx ${config.tiempoPaso/1000}s linear, cy ${config.tiempoPaso/1000}s linear`;
+    function agregarDigito(val) {
+        if (estado.ingresado.length < 4) {
+            estado.ingresado += val;
+            actualizarPantalla();
+        }
+    }
 
-        const bajarPaso = () => {
-            if (filaActual < config.filas) {
-                const der = Math.random() > 0.5 ? 1 : 0;
-                posVirtual += der; // Suma la decisión aleatoria sobre el sesgo inicial
-                
-                const y = config.startY + (filaActual * config.distY);
-                const offset = (posVirtual - (filaActual / 2)) * config.separacionX;
-                const x = centroX + offset;
+    function configurarTecladoDefectuoso() {
+        // 1. Teclas "Actuación Pesada" (1, 4, 7)
+        document.querySelectorAll('.key-heavy').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                estado.tiempoInicioPress = Date.now();
+            });
+            btn.addEventListener('mouseup', (e) => {
+                const duracion = Date.now() - estado.tiempoInicioPress;
+                if (duracion >= 800 && duracion < 1200) {
+                    agregarDigito(e.target.dataset.val);
+                } else if (duracion >= 1200) {
+                    agregarDigito(e.target.dataset.val);
+                    agregarDigito(e.target.dataset.val);
+                }
+            });
+            btn.addEventListener('mouseleave', () => estado.tiempoInicioPress = 0);
+        });
 
-                bolaSvg.setAttribute("cx", x);
-                bolaSvg.setAttribute("cy", y);
-                
-                filaActual++;
-                setTimeout(bajarPaso, config.tiempoPaso);
+        // 2. Teclas "Key Chatter" (2, 5, 8)
+        document.querySelectorAll('.key-chatter').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                agregarDigito(e.target.dataset.val);
+                if (Math.random() < 0.40 && estado.ingresado.length < 4) {
+                    setTimeout(() => agregarDigito(e.target.dataset.val), 50); 
+                }
+            });
+        });
+
+        // 3. Teclas Normales (3, 6, 9, 0)
+        document.querySelectorAll('.key-normal[data-val]').forEach(btn => {
+            btn.addEventListener('click', (e) => agregarDigito(e.target.dataset.val));
+        });
+
+        // 4. El Castigo: Borrar requiere DOBLE CLIC
+        dom.btnDelete.addEventListener('click', () => {
+            dom.display.style.opacity = "0.4";
+            setTimeout(() => dom.display.style.opacity = "1", 100);
+        });
+        dom.btnDelete.addEventListener('dblclick', () => {
+            estado.ingresado = estado.ingresado.slice(0, -1);
+            actualizarPantalla();
+        });
+
+        // Validar
+        dom.btnSubmit.addEventListener('click', () => {
+            if (estado.ingresado === estado.objetivo) {
+                dom.msg.textContent = "SESIÓN INICIADA.";
+                dom.msg.style.color = "#a4d007"; // Verde Steam
             } else {
-                const yFinal = config.startY + (config.filas * config.distY) + 20; 
-                bolaSvg.setAttribute("cy", yFinal);
-                
-                // Clampear el resultado para que no caiga fuera de las 5 canaletas (0 a 4)
-                let indiceFinal = posVirtual;
-                if (indiceFinal < 0) indiceFinal = 0;
-                if (indiceFinal > 4) indiceFinal = 4;
-
-                setTimeout(() => finalizarCaida(indiceFinal), config.tiempoPaso);
+                dom.msg.textContent = "CÓDIGO INCORRECTO.";
+                dom.msg.style.color = "#ff5c5c";
+                estado.ingresado = "";
+                setTimeout(() => {
+                    dom.msg.textContent = "";
+                    generarObjetivo(); 
+                }, 1500);
             }
-        };
-        setTimeout(bajarPaso, 50);
-    }
-
-    function finalizarCaida(indiceCanaleta) {
-        bolaSvg.style.display = 'none';
-        estado.cayendo = false;
-        
-        estado.ingresados.push(estado.letras[indiceCanaleta]);
-        actualizarIngresados();
-
-        if (estado.ingresados.length === 3) {
-            verificar();
-        } else {
-            dom.btnSoltar.disabled = false;
-            dom.slider.disabled = false; // Reactivar slider para la siguiente bola
-            actualizarPosicionBola(); // Volver a mostrar la bola arriba
-        }
-    }
-
-    function verificar() {
-        if (estado.objetivo.join('') === estado.ingresados.join('')) {
-            dom.mensaje.textContent = "Verificación exitosa. Redirigiendo...";
-            dom.mensaje.style.color = "#a4d007"; 
-            dom.mensaje.style.display = "block";
-        } else {
-            dom.mensaje.textContent = "Error biométrico. Reiniciando secuencia...";
-            dom.mensaje.style.color = "#ff4c4c"; 
-            dom.mensaje.style.display = "block";
-            setTimeout(generarObjetivo, 2000);
-        }
+        });
     }
 
     window.onload = init;
