@@ -26,3 +26,9 @@ Construí un teclado numérico que frustra al usuario simulando switches mecáni
 ## Que salio bien en el proceso?
 
 La especificación de requerimientos de eventos. Guiar a la IA para que evalue deltas de tiempo en lugar de clics normales fue fundamental. El modelo estructuro perfectamente la captura del `Date.now()` para la regla de los 800ms sin pisar variables globales entre teclas.
+
+## Quo salio mal y como lo corregi
+
+**El problema:** Al implementar el castigo del botón `DEL` (que exige un doble clic rapido para borrar), la acción de hacer doble clic constantemente en la pantalla provocaba que el navegador seleccionara el texto circundante (los asteriscos del display y el texto de los botones), arruinando por completo la inmersión de la interfaz corporativa. El codigo funcionaba pero la experiencia visual se rompia.
+
+**La corrección:** Tuve que entrar en la fase de **Review** y modificar el prompt para inyectar una regla de CSS defensiva. Agregué la propiedad `user-select: none;` a todos los botones y al display del PIN. Esto neutralizó el comportamiento nativo del navegador y permitio que el doble clic funcionara exclusivamente como un trigger lógico para nuestra maquina de estados, sin pintar la pantalla de azul.

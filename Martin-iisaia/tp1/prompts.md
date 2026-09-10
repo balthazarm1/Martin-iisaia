@@ -54,3 +54,10 @@ Quitale la funcionalidad al evento 'click' normal (solo hacé que el display tit
 **Que intentaba lograr:** La verdadera *bad UI*. En lugar de pelear con CSS o mover bolas en pantalla, le pedí al modelo que alterara las bases de interacción del navegador rompiendo los eventos asíncronos.
 
 **Que devolvio:** La lógica asíncrona correcta. Manejo los deltas de `Date.now()` para los tiempos de pulsación sin bloqueos de interfaz y utilizo el `setTimeout` correctamente para simular el rebote del 40%. La interfaz de Steam qued bien por fuera, pero intencionalmente muy malo de operar.
+
+## 3 — Review y Test: Correccion de bug visual
+
+```text
+La lógica de los eventos funciona bien, pero en la fase de testeo noté un bug visual grave: al exigir un doble clic rápido en el botón DEL, el navegador selecciona automáticamente el texto del botón y arruina la estética. 
+
+Agregá la propiedad de CSS `user-select: none;` a todos los botones para neutralizar este comportamiento nativo del navegador.
