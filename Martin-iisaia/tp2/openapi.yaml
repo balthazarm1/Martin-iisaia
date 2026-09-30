@@ -1,0 +1,144 @@
+openapi: 3.1.0
+info:
+  title: API de Playlists y Canciones
+  description: Cada playlist agrupa canciones. Una canción en este contexto pertenece a una playlist específica.
+  version: 1.0.0
+
+paths:
+  /playlists:
+    get:
+      summary: Lista todas las playlists
+      responses:
+        '200':
+          description: Lista de playlists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Playlist'
+    post:
+      summary: Crea una nueva playlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaylistInput'
+      responses:
+        '201':
+          description: Playlist creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Playlist'
+        '400':
+          description: Falta el campo name
+
+  /playlists/{playlistId}/songs:
+    parameters:
+      - name: playlistId
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Lista las canciones de una playlist
+      responses:
+        '200':
+          description: Lista de canciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Song'
+        '404':
+          description: La playlist no existe
+    post:
+      summary: Agrega una canción a una playlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SongInput'
+      responses:
+        '201':
+          description: Canción agregada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Song'
+        '400':
+          description: Falta el campo title o artist
+        '404':
+          description: La playlist no existe
+
+  /playlists/{playlistId}/songs/{songId}:
+    parameters:
+      - name: playlistId
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: songId
+        in: path
+        required: true
+        schema:
+          type: integer
+    delete:
+      summary: Elimina una canción de la playlist
+      responses:
+        '204':
+          description: Canción eliminada exitosamente
+        '404':
+          description: La canción o la playlist no existe
+
+components:
+  schemas:
+    Playlist:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+
+    PlaylistInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    Song:
+      type: object
+      required: [id, title, artist, playlist_id]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        artist:
+          type: string
+        duration_ms:
+          type: integer
+        playlist_id:
+          type: integer
+
+    SongInput:
+      type: object
+      required: [title, artist]
+      properties:
+        title:
+          type: string
+        artist:
+          type: string
+        duration_ms:
+          type: integer
