@@ -2,17 +2,15 @@
 
 Repositorio del curso Introducción a la ingeniería de software asistida por Inteligencia Artificial.
 
-Esta es la estructura de referencia. Copiala tal cual en tu propio repositorio y reemplazá el contenido por el tuyo.
 
-La carpeta `tp1/` viene con una entrega resuelta adentro, para que veas hasta dónde llega lo que se espera. Las otras dos vienen en blanco.
 
 ## Entregas
 
 | Entrega | Carpeta | Estado |
 |---------|---------|--------|
 | TP 1 | [tp1/](tp1/) | Resuelto |
-| TP 2 | [tp2/](tp2/) | en blanco |
-| Trabajo Práctico Final | [tp-final/](tp-final/) | en blanco |
+| TP 2 | [tp2/](tp2/) | Resuelto |
+| Trabajo Práctico Final | [tp-final/](tp-final/) | En progreso |
 
 ## Cómo se usa esta estructura
 
