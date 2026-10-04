@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamWave - Tu Plataforma de Música</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header con Apodo del usuario -->
+        <header>
+            <h1>🎵 IndieStream</h1>
+            <div class="user-section">
+                <label for="nickname-input">Tu apodo:</label>
+                <input type="text" id="nickname-input" placeholder="Ej: melomano99" maxlength="30">
+            </div>
+        </header>
+
+        <!-- Contenedor del Catálogo -->
+        <main>
+            <div id="loading" class="loading-state">
+                <p>⏳ Cargando catálogo de canciones...</p>
+            </div>
+            <div id="error" class="error-state hidden"></div>
+            
+            <div id="songs-container" class="songs-grid">
+                <!-- Se inyectará el catálogo desde JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Barra de Reproducción Inferior (Persistente) -->
+    <div class="bottom-player-bar">
+        <div class="player-info">
+            <span id="current-track-title" class="track-title">Ninguna canción seleccionada</span>
+            <span id="current-track-artist" class="track-artist">Selecciona una pista para reproducir</span>
+        </div>
+        <div class="player-controls">
+            <button id="play-pause-btn" title="Reproducir">▶</button>
+            <audio id="audio-player" controls></audio>
+        </div>
+    </div>
+
+    <!-- Cargar la lógica principal usando ES modules -->
+    <script type="module" src="/js/app.js"></script>
+</body>
+</html>
+
