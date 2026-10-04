@@ -1,6 +1,8 @@
+---
 paths:
   - "frontend/**/*.js"
   - "frontend/**/*.html"
+---
 
 # Reglas de Desarrollo para el Frontend (Vanilla JS)
 

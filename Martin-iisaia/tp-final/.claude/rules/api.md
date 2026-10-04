@@ -1,5 +1,7 @@
+---
 paths:
   - "backend/**/*.py"
+---
 
 # Reglas de Desarrollo para la API (FastAPI)
 
