@@ -6,11 +6,20 @@ import { getCurrentSongId, isPlaying, playTrack } from '../player.js';
 import { el, showError, withLoading } from '../ui.js';
 
 const songsById = new Map();
+const likedIds = new Set();
 let allSongs = [];
 let gridEl = null;
 let listenersReady = false;
 
 function renderSongCard(song) {
+    const liked = likedIds.has(song.id);
+    const likeBtn = el('button', {
+        type: 'button',
+        className: liked ? 'btn btn-like is-liked' : 'btn btn-like',
+        text: liked ? '♥ Te gusta' : '♥ Like',
+        dataset: { action: 'like', id: song.id },
+    });
+    likeBtn.disabled = liked;
     return el('article', { className: 'song-card', dataset: { songId: song.id } }, [
         el('div', { className: 'song-meta' }, [
             el('h3', { className: 'song-title', text: song.title }),
@@ -18,7 +27,7 @@ function renderSongCard(song) {
         ]),
         el('div', { className: 'song-actions' }, [
             el('button', { type: 'button', className: 'btn btn-play', text: '▶ Reproducir', dataset: { action: 'play', id: song.id } }),
-            el('button', { type: 'button', className: 'btn btn-like', text: '♥ Like', dataset: { action: 'like', id: song.id } }),
+            likeBtn,
             el('span', { className: 'like-count', text: String(song.likes_count) }),
         ]),
     ]);
@@ -71,10 +80,13 @@ async function handleLike(button, songId) {
     }
     try {
         const like = await withLoading(button, 'Cargando...', () => likeSong(songId, nickname));
+        songsById.get(songId).likes_count = like.likes_count;
+        likedIds.add(songId);
         button.parentElement.querySelector('.like-count').textContent = String(like.likes_count);
         markLiked(button);
     } catch (err) {
         if (err instanceof ApiError && err.status === 409) {
+            likedIds.add(songId);
             markLiked(button);
             showError('Ya diste like a esta canción');
         } else {
