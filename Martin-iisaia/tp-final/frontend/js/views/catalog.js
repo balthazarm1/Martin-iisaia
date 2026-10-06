@@ -3,6 +3,7 @@
 import { ApiError, getSongs, likeSong } from '../api.js';
 import { focusNickname, getNickname } from '../nickname.js';
 import { getCurrentSongId, isPlaying, playTrack } from '../player.js';
+import { filterSongs } from '../search.js';
 import { el, showError, withLoading } from '../ui.js';
 
 const songsById = new Map();
@@ -10,6 +11,9 @@ const likedIds = new Set();
 let allSongs = [];
 let gridEl = null;
 let listenersReady = false;
+let query = '';
+let summaryEl = null;
+let searchEl = null;
 
 function renderSongCard(song) {
     const liked = likedIds.has(song.id);
@@ -44,15 +48,64 @@ function renderStatus(container, message, withRetry = false) {
 }
 
 function renderSkeleton(container) {
+    searchEl = el('input', {
+        type: 'search',
+        className: 'search-input',
+        placeholder: 'Buscar por título o artista…',
+        'aria-label': 'Buscar canciones por título o artista',
+        autocomplete: 'off',
+    });
+    searchEl.value = query;
+    summaryEl = el('p', { className: 'search-summary', 'aria-live': 'polite' });
     gridEl = el('section', { className: 'song-grid' });
     container.replaceChildren(
         el('h2', { className: 'view-title', text: 'Catálogo' }),
+        el('div', { className: 'search-bar' }, [searchEl]),
+        summaryEl,
         gridEl,
     );
+    searchEl.addEventListener('input', onSearchInput);
+    searchEl.addEventListener('keydown', onSearchKeydown);
+}
+
+function onSearchInput() {
+    query = searchEl.value;
+    renderGrid();
+}
+
+function onSearchKeydown(event) {
+    // Escape con el campo ya vacío no hace nada: ni repinta ni roba el foco.
+    if (event.key !== 'Escape' || searchEl.value === '') return;
+    clearSearch();
+}
+
+function clearSearch() {
+    searchEl.value = '';
+    query = '';
+    renderGrid();
+    searchEl.focus();
+}
+
+function describeResults(visibles, total) {
+    const plural = total === 1 ? 'canción' : 'canciones';
+    if (query.trim() === '') return `${total} ${plural}`;
+    return `Mostrando ${visibles} de ${total} ${plural}`;
+}
+
+function renderNoMatches() {
+    const limpiar = el('button', { type: 'button', className: 'btn', text: 'Limpiar búsqueda' });
+    limpiar.addEventListener('click', clearSearch);
+    return el('div', { className: 'status no-matches' }, [
+        el('p', { text: `Ninguna canción coincide con «${query.trim()}»` }),
+        limpiar,
+    ]);
 }
 
 export function renderGrid() {
-    gridEl.replaceChildren(...allSongs.map(renderSongCard));
+    const visibles = filterSongs(allSongs, query);
+    summaryEl.textContent = describeResults(visibles.length, allSongs.length);
+    if (visibles.length === 0) gridEl.replaceChildren(renderNoMatches());
+    else gridEl.replaceChildren(...visibles.map(renderSongCard));
     highlightPlaying(getCurrentSongId(), isPlaying());
 }
 
