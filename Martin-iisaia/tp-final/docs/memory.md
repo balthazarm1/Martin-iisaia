@@ -37,12 +37,25 @@ Diseño y plan quedaron versionados en `docs/superpowers/specs/` y `docs/superpo
 - **Verificación manual**, sin Node ni runner: el frontend sigue siendo Vanilla JS sin
   build. La función pura se verifica importándola desde la consola de DevTools.
 
-## 3. Próximo paso lógico
+## 3. Estado de la verificación
 
-- **Correr la checklist del README en el navegador.** El código está implementado y
-  revisado, pero las 9 filas de verificación todavía no se ejecutaron sobre la app real.
-  Es lo primero que hay que hacer antes de dar el hito por cerrado.
-- Mover el filtrado al backend con `?q=` sobre `GET /api/songs`. Al volverse asíncrono
-  va a necesitar debounce y estado de carga.
+La checklist de 9 filas del README se corrió en el navegador y pasó entera:
+acentos, mayúsculas, subcadena, sin coincidencias, el audio que no se corta al
+filtrar la canción que suena, los likes que sobreviven al re-render, la búsqueda
+que sobrevive a Reintentar, cero requests al tipear y el cursor que no se pierde.
+
+Fuera del navegador se verificó además que los módulos ES resuelven sus imports,
+que la API responde con las 3 canciones del seed, que los estáticos se sirven con
+el MIME correcto, y que la lógica de coincidencia da los resultados esperados
+contra el payload real de la API.
+
+## 4. Próximo paso lógico
+
+- El branch `feature/buscador-catalogo` ya está pusheado a `origin`. Falta abrir
+  el PR a `main` desde la web (`gh` no está instalado en este entorno).
+- Mover el filtrado al backend con `?q=` sobre `GET /api/songs`. Al volverse
+  asíncrono va a necesitar debounce y estado de carga.
 - Automatizar la checklist con un servidor MCP de Playwright.
-- Pushear `feature/buscador-catalogo` y abrir el PR a `main`.
+- Pendiente menor, ya anotado en la revisión: la etiqueta `♥ Te gusta` aparece
+  tanto en `renderSongCard` como en `markLiked`. Candidata a una constante
+  compartida si alguna vez cambia el texto.
