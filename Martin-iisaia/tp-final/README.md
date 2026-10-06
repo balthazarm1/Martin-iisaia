@@ -46,6 +46,33 @@ Navegador ── GET /            → frontend/ (StaticFiles, index.html = Shell
 - `js/player.js` es el único módulo que toca el `<audio>`. Avisa los cambios con el evento `player:change`.
 - `js/views/catalog.js` renderiza el catálogo por DOM después del `fetch`. Muestra "Cargando...", tiene reintento y marca la tarjeta que está sonando.
 - `js/api.js` normaliza los errores en `ApiError(status, message)`. `js/ui.js` tiene los helpers de DOM y el banner de errores.
+- `js/search.js` es un módulo puro (sin DOM ni `fetch`) con la lógica de coincidencia del buscador. Está aislado a propósito: es el único punto que cambia si el filtrado se muda al backend.
+
+## Verificación
+
+### API
+
+Con el servidor levantado, `GET /api/songs` devuelve las 3 canciones del seed con `likes_count: 0`; `GET /api/songs/999` devuelve 404; `POST /api/songs/1/like` con un nickname nuevo devuelve 201 y el total actualizado, repetido devuelve 409, y con `{"nickname": ""}` devuelve 422. Reiniciar el servidor no duplica el seed.
+
+### Buscador del catálogo
+
+Filtrado local: la barra filtra la lista que ya devolvió `GET /api/songs`, sin pedirle nada al servidor. Con el seed por defecto:
+
+| # | Paso | Esperado |
+|---|---|---|
+| 1 | Tipear `tranvias` | Aparece *Garage Session #2* — acentos normalizados |
+| 2 | Tipear `LUNA` | Aparece *Maqueta Nocturna* — mayúsculas ignoradas |
+| 3 | Tipear `do` | Solo *Arpegio en Do* — subcadena, no prefijo |
+| 4 | Tipear `zzz` | Mensaje de sin coincidencias y botón Limpiar |
+| 5 | Reproducir track 1 y buscar `arpegio` | La música **no** se corta; la barra inferior sigue mostrando *Maqueta Nocturna* |
+| 6 | Dar like, luego tipear y borrar | El botón sigue en *♥ Te gusta* deshabilitado y el contador conserva el valor nuevo |
+| 7 | Apagar el servidor, pulsar Reintentar, volver a levantarlo | El texto tecleado sigue en el input |
+| 8 | DevTools ▸ Network mientras se tipea | **Cero requests** y cero navegaciones de documento |
+| 9 | Tipear rápido | El cursor nunca se pierde |
+
+Limpiar la búsqueda: tecla <kbd>Esc</kbd> o la ✕ nativa del campo.
+
+Tres espacios en blanco cuentan como búsqueda vacía: se muestran las 3 canciones, no el estado de sin coincidencias.
 
 ## Qué decidí yo
 

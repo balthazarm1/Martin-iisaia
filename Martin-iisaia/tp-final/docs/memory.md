@@ -1,30 +1,48 @@
 # Memoria del proyecto — IndieStream
 
-_Última actualización: 2026-10-04 · branch `feat/indiestream`_
+_Última actualización: 2026-10-05 · branch `feature/buscador-catalogo`_
 
 ## 1. Qué se logró
 
-Se completaron los pasos 0–9 de `docs/plan.md`.
-- **Scaffolding.** Se borró el MVP viejo, se creó `pyproject.toml` con `uv` y se corrigió el frontmatter de `.claude/rules/*.md`.
-- **Backend.** `config.py`, `db.py`, `models.py`, `schemas.py`, `seed.py`, `routers/songs.py`, `routers/likes.py` y `main.py`.
-- **Frontend.** `index.html` (la Shell), `css/styles.css` y los módulos `js/main.js`, `api.js`, `ui.js`, `nickname.js`, `player.js` y `views/catalog.js`.
-- **Verificación de la API con curl.** Pasaron 200, 404, 201, 409, 422 y el 404 sobre el like. El seed es idempotente y los audios se sirven con el MIME correcto.
-- **Verificación visual.** Una captura con Edge headless muestra el catálogo renderizado.
-- **Guardrails.** Ningún archivo pasa de 136 líneas ni ninguna función de 25.
+El catálogo ahora se filtra por título o artista mientras se escribe, sin recargar
+la página y sin cortar la reproducción.
+
+- **Módulo nuevo `frontend/js/search.js`.** Puro, sin DOM ni fetch: `normalize`,
+  `songMatches` y `filterSongs`.
+- **`catalog.js` partido en esqueleto y grid.** `renderSkeleton` dibuja una vez por
+  montaje; `renderGrid` reemplaza solo el contenido de la `<section>`, así que el
+  input conserva foco, texto y cursor.
+- **Estados de UI:** resumen de resultados, bloque propio para cero coincidencias con
+  botón Limpiar, y limpieza con Esc o con la ✕ nativa de `type="search"`.
+- **Dos arreglos preexistentes** que el re-render destapó: el estado de "ya di like"
+  vivía únicamente en el DOM, y el `aria-live` estaba en el `<main>`.
+- **Backend sin cambios.** El contrato de la API quedó igual.
+
+Diseño y plan quedaron versionados en `docs/superpowers/specs/` y `docs/superpowers/plans/`.
 
 ## 2. Decisiones técnicas
 
-- Las rutas son absolutas con `pathlib` (`backend/config.py`), así el servidor no depende del cwd.
-- La DB guarda `audio_path` y la API lo expone como `audio_url`.
-- El like duplicado se detecta con `UniqueConstraint` + `IntegrityError` y devuelve 409. El nickname se normaliza con `strip()` y regex `^[\w\- ]+$`.
-- `POST /like` devuelve `likes_count` para que el frontend no tenga que volver a pedir el catálogo.
-- En el frontend, todo texto del servidor se inserta con `textContent` (helper `el()`), nunca con `innerHTML`.
-- El catálogo usa delegación de eventos (`data-action`/`data-id`). `player.js` emite `player:change` y el catálogo resalta la tarjeta activa.
-- Audios: solo `track1.mp3` y `track2.wav` del commit viejo eran reales; los demás eran placeholders de texto. `track3.wav` es un arpegio sintético generado con la stdlib de Python.
+- El filtrado es **local**: sobre la lista que ya devolvió `GET /api/songs`. La lógica
+  quedó aislada en `search.js` para que migrar a `?q=` sea cambiar un solo call site.
+- Coincidencia por **subcadena insensible a mayúsculas y acentos** (`toLocaleLowerCase`
+  + `NFD` + descarte de diacríticos). Consecuencia aceptada: `ñ` se normaliza a `n`,
+  así que `nino` encuentra `niño`.
+- La barra vive **dentro de la vista**, sobre el grid, no en el header: la búsqueda
+  pertenece al catálogo y no a la Shell.
+- **Sin debounce**, porque el filtrado es síncrono y en memoria. Hará falta recién
+  cuando pase al backend.
+- `likedIds` (un `Set`) es la fuente de verdad del estado "likeado"; `markLiked` quedó
+  como actualización puntual del botón montado. El backend sigue siendo la verdad real
+  y responde `409` ante un duplicado.
+- **Verificación manual**, sin Node ni runner: el frontend sigue siendo Vanilla JS sin
+  build. La función pura se verifica importándola desde la consola de DevTools.
 
 ## 3. Próximo paso lógico
 
-- Probar a mano en el navegador: reproducir, dar like sin cortar el audio, like repetido y servidor apagado → Reintentar.
-- Completar en el README las secciones "Cómo gestioné el contexto" y "Qué salió mal".
-- Pushear `feat/indiestream` y abrir el PR a `main`.
-- Posibles mejoras después: más vistas (artista, búsqueda) o tests automáticos con `TestClient`.
+- **Correr la checklist del README en el navegador.** El código está implementado y
+  revisado, pero las 9 filas de verificación todavía no se ejecutaron sobre la app real.
+  Es lo primero que hay que hacer antes de dar el hito por cerrado.
+- Mover el filtrado al backend con `?q=` sobre `GET /api/songs`. Al volverse asíncrono
+  va a necesitar debounce y estado de carga.
+- Automatizar la checklist con un servidor MCP de Playwright.
+- Pushear `feature/buscador-catalogo` y abrir el PR a `main`.
