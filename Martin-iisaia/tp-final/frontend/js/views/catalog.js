@@ -6,6 +6,8 @@ import { getCurrentSongId, isPlaying, playTrack } from '../player.js';
 import { el, showError, withLoading } from '../ui.js';
 
 const songsById = new Map();
+let allSongs = [];
+let gridEl = null;
 let listenersReady = false;
 
 function renderSongCard(song) {
@@ -32,11 +34,16 @@ function renderStatus(container, message, withRetry = false) {
     container.replaceChildren(el('div', { className: 'status' }, children));
 }
 
-function renderList(container, songs) {
-    songsById.clear();
-    songs.forEach((song) => songsById.set(song.id, song));
-    const grid = el('section', { className: 'song-grid' }, songs.map(renderSongCard));
-    container.replaceChildren(el('h2', { className: 'view-title', text: 'Catálogo' }), grid);
+function renderSkeleton(container) {
+    gridEl = el('section', { className: 'song-grid' });
+    container.replaceChildren(
+        el('h2', { className: 'view-title', text: 'Catálogo' }),
+        gridEl,
+    );
+}
+
+export function renderGrid() {
+    gridEl.replaceChildren(...allSongs.map(renderSongCard));
     highlightPlaying(getCurrentSongId(), isPlaying());
 }
 
@@ -96,8 +103,15 @@ export async function mountCatalog(container) {
     renderStatus(container, 'Cargando catálogo...');
     try {
         const songs = await getSongs();
-        if (songs.length === 0) renderStatus(container, 'Todavía no hay canciones');
-        else renderList(container, songs);
+        if (songs.length === 0) {
+            renderStatus(container, 'Todavía no hay canciones');
+            return;
+        }
+        allSongs = songs;
+        songsById.clear();
+        songs.forEach((song) => songsById.set(song.id, song));
+        renderSkeleton(container);
+        renderGrid();
     } catch (err) {
         renderStatus(container, `No se pudo cargar el catálogo: ${err.message}`, true);
     }
