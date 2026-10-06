@@ -144,7 +144,12 @@ export function filterSongs(songs, query) {
 }
 ```
 
-Detalle que importa: `toLocaleLowerCase('es')` va **antes** de `normalize('NFD')`. Si se invierte, `TRANVÍAS` no baja correctamente y el caso 'mayus + tilde' falla.
+Sobre el orden de `toLocaleLowerCase('es')` y `normalize('NFD')`: respetá el de arriba, pero
+sabé que **no es load-bearing**. Se comprobó con `TRANVÍAS`, `Los Tranvías`, `NIÑO`, `Ángela`
+y `ÉXITO` que invertirlos da exactamente el mismo resultado, porque quitar diacríticos y
+bajar a minúsculas conmutan en el rango latino. Se mantiene minúsculas primero por una razón
+menor: así `normalize` se lee como "pasar a forma canónica y después limpiar", y la operación
+de locale opera sobre el texto original en vez de sobre uno ya mutilado.
 
 - [ ] **Step 4: Ejecutar el arnés para confirmar que pasa**
 
