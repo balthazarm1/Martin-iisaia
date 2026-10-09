@@ -10,6 +10,3 @@ venv/
 .mypy_cache/
 .ruff_cache/
 *.db
-
-# Artefactos de brainstorming (visual companion)
-.superpowers/

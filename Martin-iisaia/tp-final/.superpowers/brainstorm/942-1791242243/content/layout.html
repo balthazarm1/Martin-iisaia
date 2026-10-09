@@ -1,0 +1,153 @@
+<h2>¿Dónde vive la barra de búsqueda?</h2>
+<p class="subtitle">
+  No es solo estética. La ubicación decide <strong>si el input sobrevive a los re-renders</strong>
+  del catálogo (incluido el botón «Reintentar») y cuánto hay que refactorizar <code>mountCatalog</code>,
+  que hoy hace <code>container.replaceChildren(título, grid)</code> y borraría el input en cada pasada.
+</p>
+
+<div class="section">
+  <span class="label">Estado actual · referencia</span>
+  <div class="mockup">
+    <div class="mockup-header">Hoy — sin búsqueda</div>
+    <div class="mockup-body" style="background:#121212;color:#f2f2f2;padding:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#1e1e1e;border-bottom:1px solid #2a2a2a">
+        <strong style="font-size:13px">Indie<span style="color:#1db954">Stream</span></strong>
+        <span style="font-size:11px;color:#a0a0a0">Tu nickname <span style="display:inline-block;width:90px;height:18px;border:1px solid #2a2a2a;border-radius:6px;background:#121212;vertical-align:middle"></span></span>
+      </div>
+      <div style="padding:12px 14px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px">Catálogo</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="background:#1e1e1e;border-radius:8px;padding:8px;font-size:10px">Maqueta Nocturna<br><span style="color:#a0a0a0">Luna Ferro</span></div>
+          <div style="background:#1e1e1e;border-radius:8px;padding:8px;font-size:10px">Garage Session #2<br><span style="color:#a0a0a0">Los Tranvías</span></div>
+          <div style="background:#1e1e1e;border-radius:8px;padding:8px;font-size:10px">Arpegio en Do<br><span style="color:#a0a0a0">Synth Casero</span></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1e1e1e;border-top:1px solid #2a2a2a">
+        <span style="width:22px;height:22px;border-radius:50%;background:#1db954;color:#000;font-size:10px;display:flex;align-items:center;justify-content:center">▶</span>
+        <span style="font-size:10px;color:#a0a0a0">Nada sonando — reproductor persistente</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Las tres ubicaciones</h3>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#121212;padding:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding:8px 10px;background:#1e1e1e;border-bottom:1px solid #2a2a2a">
+        <strong style="font-size:11px;color:#f2f2f2">Indie<span style="color:#1db954">Stream</span></strong>
+        <span style="flex:1;max-width:120px;height:20px;border:1px solid #1db954;border-radius:6px;background:#121212;color:#a0a0a0;font-size:9px;display:flex;align-items:center;padding:0 6px">🔍 Buscar…</span>
+        <span style="width:70px;height:18px;border:1px solid #2a2a2a;border-radius:6px;background:#121212"></span>
+      </div>
+      <div style="padding:10px;color:#f2f2f2">
+        <div style="font-size:11px;font-weight:700;margin-bottom:6px">Catálogo</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+          <div style="background:#1e1e1e;border-radius:6px;height:30px"></div>
+          <div style="background:#1e1e1e;border-radius:6px;height:30px"></div>
+          <div style="background:#1e1e1e;border-radius:6px;height:30px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · En el header de la Shell</h3>
+      <p>El <code>&lt;input&gt;</code> se declara en <code>index.html</code>, <strong>fuera de <code>#view</code></strong>. Vive como el reproductor: nunca se destruye.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Inmune a todo re-render: cero refactor de <code>mountCatalog</code></li>
+          <li>Coherente con la arquitectura Shell ya decidida</li>
+          <li>Conserva foco y texto aun tras «Reintentar»</li>
+        </ul></div>
+        <div class="cons"><h4>Contras</h4><ul>
+          <li>Insinúa búsqueda global, pero solo filtra el catálogo</li>
+          <li>Queda lejos de la lista que filtra</li>
+          <li>Header ya cargado con el nickname; en móvil se apretuja</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#121212;padding:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#1e1e1e;border-bottom:1px solid #2a2a2a">
+        <strong style="font-size:11px;color:#f2f2f2">Indie<span style="color:#1db954">Stream</span></strong>
+        <span style="width:70px;height:18px;border:1px solid #2a2a2a;border-radius:6px;background:#121212"></span>
+      </div>
+      <div style="padding:10px;color:#f2f2f2">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:11px;font-weight:700">Catálogo</span>
+          <span style="font-size:8px;color:#a0a0a0">3 de 3</span>
+        </div>
+        <div style="height:22px;border:1px solid #1db954;border-radius:6px;background:#1e1e1e;color:#a0a0a0;font-size:9px;display:flex;align-items:center;padding:0 6px;margin-bottom:8px">🔍 Buscar por título o artista…</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+          <div style="background:#1e1e1e;border-radius:6px;height:28px"></div>
+          <div style="background:#1e1e1e;border-radius:6px;height:28px"></div>
+          <div style="background:#1e1e1e;border-radius:6px;height:28px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · Dentro de la vista, sobre el grid</h3>
+      <p>La vista pasa a tener un <strong>esqueleto estable</strong> (título + buscador + <code>&lt;section&gt;</code> vacía) y cada filtrado reemplaza <strong>solo el grid</strong>, nunca el input.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>El control está donde actúa: se lee solo</li>
+          <li>Límites más limpios: la búsqueda pertenece a la vista</li>
+          <li>Si mañana hay más vistas, no arrastra un input ajeno</li>
+        </ul></div>
+        <div class="cons"><h4>Contras</h4><ul>
+          <li>Obliga a partir <code>mountCatalog</code> en esqueleto + grid</li>
+          <li>Hay que preservar texto y foco a mano en «Reintentar»</li>
+          <li>Un poco más de código que A</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#121212;padding:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#1e1e1e;border-bottom:1px solid #2a2a2a">
+        <strong style="font-size:11px;color:#f2f2f2">Indie<span style="color:#1db954">Stream</span></strong>
+        <span style="width:70px;height:16px;border:1px solid #2a2a2a;border-radius:6px;background:#121212"></span>
+      </div>
+      <div style="padding:6px 10px;background:#1a1a1a;border-bottom:1px solid #2a2a2a">
+        <div style="height:20px;border:1px solid #1db954;border-radius:6px;background:#121212;color:#a0a0a0;font-size:9px;display:flex;align-items:center;padding:0 6px">🔍 Buscar por título o artista…</div>
+      </div>
+      <div style="padding:10px;color:#f2f2f2">
+        <div style="font-size:11px;font-weight:700;margin-bottom:6px">Catálogo</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+          <div style="background:#1e1e1e;border-radius:6px;height:28px"></div>
+          <div style="background:#1e1e1e;border-radius:6px;height:28px"></div>
+          <div style="background:#1e1e1e;border-radius:6px;height:28px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C · Sub-barra sticky propia</h3>
+      <p>Una franja a todo el ancho entre el header y <code>&lt;main&gt;</code>, con <code>position: sticky</code>, que acompaña al hacer scroll.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Muy visible; se parece a un reproductor real</li>
+          <li>Sigue accesible con catálogos largos</li>
+          <li>Tampoco la toca <code>replaceChildren</code></li>
+        </ul></div>
+        <div class="cons"><h4>Contras</h4><ul>
+          <li>Tercera franja fija: roba altura, ya hay header + player</li>
+          <li>Mismo problema de ámbito que A, con más CSS</li>
+          <li>Difícil de justificar con 3 canciones (YAGNI)</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section">
+  <p class="subtitle">
+    <strong>Mi recomendación: B.</strong> El refactor que exige es justamente el que querés igual —
+    separar «esqueleto de la vista» de «lista de resultados» — y es el que deja la puerta abierta
+    para cambiar el filtro por <code>?q=</code> sin tocar el layout. A es más barata hoy pero miente
+    sobre el alcance de la búsqueda; C agrega una franja fija que con 3 canciones no se paga.
+  </p>
+</div>
