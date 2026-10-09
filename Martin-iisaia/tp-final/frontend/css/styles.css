@@ -134,3 +134,25 @@ main {
 .player-info strong, .player-info span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .player-bar audio { width: min(420px, 45%); }
+
+.search-bar { margin: 0 0 .5rem; }
+
+.search-input {
+    width: 100%;
+    max-width: 420px;
+    padding: .55rem .8rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--surface-2);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1rem;
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+/* La ✕ nativa de type="search" viene casi negra y se pierde sobre el tema oscuro. */
+.search-input::-webkit-search-cancel-button { filter: invert(.8); cursor: pointer; }
+
+.search-summary { margin: 0 0 1rem; color: var(--muted); font-size: .85rem; }
+
+/* El bloque de "sin coincidencias" ocupa todo el ancho del grid. */
+.song-grid > .no-matches { grid-column: 1 / -1; }
+.no-matches p { margin: 0 0 1rem; }

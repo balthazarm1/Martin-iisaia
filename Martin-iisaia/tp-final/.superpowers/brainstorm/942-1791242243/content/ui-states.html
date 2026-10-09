@@ -1,0 +1,108 @@
+<h2>Los tres estados de la vista con buscador</h2>
+<p class="subtitle">
+  Opción B ya decidida: el buscador va dentro de la vista, sobre el grid, y solo se reemplaza
+  la <code>&lt;section class="song-grid"&gt;</code>. Esto es lo que vería el usuario en cada estado,
+  con las canciones reales del seed. Validá los textos y el contador.
+</p>
+
+<div class="section">
+  <span class="label">Estado 1 · sin búsqueda</span>
+  <div class="mockup">
+    <div class="mockup-header">query = "" — se muestran las 3</div>
+    <div class="mockup-body" style="background:#121212;padding:0">
+      <div style="padding:12px 14px;color:#f2f2f2">
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px">Catálogo</div>
+        <div style="height:30px;border:1px solid #2a2a2a;border-radius:10px;background:#1e1e1e;color:#a0a0a0;font-size:11px;display:flex;align-items:center;padding:0 10px;margin-bottom:6px">
+          Buscar por título o artista…
+        </div>
+        <div style="font-size:10px;color:#a0a0a0;margin-bottom:10px">3 canciones</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="background:#1e1e1e;border-radius:8px;padding:8px;font-size:10px">Maqueta Nocturna<br><span style="color:#a0a0a0">Luna Ferro</span><br><span style="display:inline-block;margin-top:6px;background:#1db954;color:#000;border-radius:5px;padding:2px 5px;font-size:8px">▶ Reproducir</span></div>
+          <div style="background:#1e1e1e;border-radius:8px;padding:8px;font-size:10px">Garage Session #2<br><span style="color:#a0a0a0">Los Tranvías</span><br><span style="display:inline-block;margin-top:6px;background:#1db954;color:#000;border-radius:5px;padding:2px 5px;font-size:8px">▶ Reproducir</span></div>
+          <div style="background:#1e1e1e;border-radius:8px;padding:8px;font-size:10px">Arpegio en Do<br><span style="color:#a0a0a0">Synth Casero</span><br><span style="display:inline-block;margin-top:6px;background:#1db954;color:#000;border-radius:5px;padding:2px 5px;font-size:8px">▶ Reproducir</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <span class="label">Estado 2 · con coincidencias</span>
+  <div class="mockup">
+    <div class="mockup-header">query = "tranvias" — sin tilde, y encuentra «Los Tranvías»</div>
+    <div class="mockup-body" style="background:#121212;padding:0">
+      <div style="padding:12px 14px;color:#f2f2f2">
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px">Catálogo</div>
+        <div style="height:30px;border:1px solid #1db954;border-radius:10px;background:#1e1e1e;color:#f2f2f2;font-size:11px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;margin-bottom:6px">
+          <span>tranvias<span style="border-left:1px solid #1db954;margin-left:1px">&nbsp;</span></span>
+          <span style="color:#a0a0a0;font-size:12px">✕</span>
+        </div>
+        <div style="font-size:10px;color:#a0a0a0;margin-bottom:10px">Mostrando 1 de 3 canciones</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="background:#1e1e1e;border-radius:8px;padding:8px;font-size:10px">Garage Session #2<br><span style="color:#a0a0a0">Los Tranvías</span><br><span style="display:inline-block;margin-top:6px;background:#1db954;color:#000;border-radius:5px;padding:2px 5px;font-size:8px">▶ Reproducir</span></div>
+        </div>
+        <p style="font-size:9px;color:#a0a0a0;margin-top:12px;border-top:1px dashed #2a2a2a;padding-top:8px">
+          Si «Maqueta Nocturna» estaba sonando, su tarjeta desaparece del grid pero
+          <strong style="color:#1db954">la música sigue</strong> y la barra inferior la sigue mostrando.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <span class="label">Estado 3 · sin coincidencias</span>
+  <div class="mockup">
+    <div class="mockup-header">query = "zzz" — distinto de «catálogo vacío»</div>
+    <div class="mockup-body" style="background:#121212;padding:0">
+      <div style="padding:12px 14px;color:#f2f2f2">
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px">Catálogo</div>
+        <div style="height:30px;border:1px solid #1db954;border-radius:10px;background:#1e1e1e;color:#f2f2f2;font-size:11px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;margin-bottom:6px">
+          <span>zzz</span><span style="color:#a0a0a0;font-size:12px">✕</span>
+        </div>
+        <div style="font-size:10px;color:#a0a0a0;margin-bottom:10px">Mostrando 0 de 3 canciones</div>
+        <div style="text-align:center;padding:22px 0;color:#a0a0a0">
+          <p style="margin:0 0 10px;font-size:11px">Ninguna canción coincide con «zzz»</p>
+          <span style="display:inline-block;background:#2a2a2a;color:#f2f2f2;border-radius:8px;padding:5px 10px;font-size:10px">Limpiar búsqueda</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Lo que propongo fijar en el spec</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="contador" onclick="toggleSelect(this)">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>Contador siempre visible</h3>
+        <p>«3 canciones» sin búsqueda; «Mostrando 1 de 3 canciones» al filtrar. Es también el anuncio para lectores de pantalla.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="limpiar" onclick="toggleSelect(this)">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>Limpiar con ✕ nativo y con Escape</h3>
+        <p><code>type="search"</code> da la ✕ del navegador gratis; <kbd>Esc</kbd> limpia y deja el foco en el input. Sin botón propio.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="vacio" onclick="toggleSelect(this)">
+      <div class="letter">3</div>
+      <div class="content">
+        <h3>«Sin coincidencias» ≠ «catálogo vacío»</h3>
+        <p>Si el server devuelve 0 canciones sigue diciendo «Todavía no hay canciones». El mensaje con ✕ y botón «Limpiar» es solo para la búsqueda.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="persistencia" onclick="toggleSelect(this)">
+      <div class="letter">4</div>
+      <div class="content">
+        <h3>La búsqueda sobrevive a «Reintentar»</h3>
+        <p><code>query</code> es estado del módulo: si el fetch falla y después reintentás, el esqueleto se rearma con el texto que habías tecleado.</p>
+      </div>
+    </div>
+  </div>
+  <p class="subtitle" style="margin-top:10px">
+    Si alguno no te convence, decímelo por la terminal y lo cambio antes de escribir el spec.
+  </p>
+</div>
