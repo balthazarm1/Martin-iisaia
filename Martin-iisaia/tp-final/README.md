@@ -1,8 +1,7 @@
-# Trabajo Práctico Final — Título
+# Trabajo Práctico Final — IndieStream
 
 La aplicación completa: interfaz, servidor y datos que persisten. Se presenta y se defiende en la última clase.
 
-Además de lo que pide cada entrega anterior, acá se espera que el repositorio conserve la evidencia del proceso: la especificación y el plan como archivos en disco, el historial de commits, las branches y los pull requests. Para cuando llegues a esta entrega vas a tener las herramientas para que eso salga solo, como subproducto de trabajar bien.
 
 ## Cómo se ejecuta
 
@@ -74,6 +73,8 @@ Limpiar la búsqueda: tecla <kbd>Esc</kbd> o la ✕ nativa del campo.
 
 Tres espacios en blanco cuentan como búsqueda vacía: se muestran las 3 canciones, no el estado de sin coincidencias.
 
+Nota: Los pasos de esta tabla fueron validados exitosamente de forma automatizada (E2E) delegando el control del navegador a un agente de IA mediante el protocolo Playwright MCP.
+
 ## Qué decidí yo
 
 - **Shell con reproductor persistente.** La página nunca se recarga y la música no se corta.
@@ -84,8 +85,22 @@ Tres espacios en blanco cuentan como búsqueda vacía: se muestran las 3 cancion
 
 ## Cómo gestioné el contexto
 
-Un proyecto de varios archivos y varias sesiones no entra entero en la ventana de contexto. Cómo lo resolviste: qué persististe, qué aislaste, cómo hiciste para que el agente no perdiera el hilo entre sesiones.
+En lugar de depender únicamente de la memoria temporal del chat, el proyecto se desarrolló utilizando un flujo arquitectónico estricto basado en artefactos de disco.
+
+Para evitar que el agente perdiera el hilo entre sesiones (especialmente durante cortes por límite de uso), documenté las decisiones y el progreso de forma iterativa:
+
+1. **Especificaciones Previas:** Antes de codificar el buscador, se forzó al agente a generar documentos de diseño (`docs/superpowers/`) definiendo el comportamiento (filtrado en cliente sin *debounce*) y los módulos afectados (aislando `search.js` del DOM).
+2. **Memoria Viva:** Se mantuvo un archivo `docs/memory.md` que servía como punto de restauración. Al iniciar una nueva sesión, el agente solo debía leer este archivo para entender el estado actual del MVP y qué faltaba por implementar.
+3. **Validación E2E (MCP):** Para cerrar el proyecto sin saturar el contexto con HTML renderizado manualmente, se integró el protocolo MCP instalando un servidor local de Playwright. Esto permitió que el agente navegara, inyectara eventos y validara el DOM de forma autónoma, sin tener que "explicarle" el código de nuevo.
 
 ## Qué salió mal
 
-Los desvíos grandes: dónde el agente se fue para otro lado, cómo lo detectaste y cómo lo corregiste.
+El desarrollo de la *feature* del buscador presentó tres desvíos importantes que requirieron corrección estructural:
+
+1. **Pérdida de foco en el input:** Al inicio, el renderizado del catálogo recreaba todo el DOM al filtrar, lo que provocaba que el usuario perdiera el cursor mientras tipeaba. Esto se corrigió separando la vista en un esqueleto estático y un contenedor (`<section class="catalog-grid">`) que se actualiza sin destruir el input.
+2. **Estado local vs. DOM:** El estado de los "Likes" vivía únicamente en la vista HTML. Al filtrar y volver a renderizar las tarjetas, los botones de *like* volvían a su estado original deshabilitando los likes dados por el usuario. La solución fue promover `likedIds` a una variable de estado en memoria.
+3. **El desafío del MCP y los binarios:** Al intentar correr la suite de Playwright MCP, la automatización falló porque Google Chrome no estaba instalado y `npx playwright install chrome` fue bloqueado por falta de permisos de administrador. Para no detener la validación, el agente logró readaptar su propia configuración, aisló un script temporal de prueba y ejecutó toda la validación *headless* utilizando el motor de Microsoft Edge ya disponible en el sistema.
+
+---
+
+
